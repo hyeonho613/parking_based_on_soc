@@ -11,30 +11,15 @@ log/
 # Python 관련
 *.pyc
 __pycache__/
-*.pyo
-*.pyd
 
 # 임시 파일
 *.swp
-*.swo
 *~
 
-# IDE/에디터 설정
+# IDE 설정
 .vscode/
 .idea/
-*.sublime-project
-*.sublime-workspace
-
-# 로그 및 데이터베이스 파일
-*.log
-*.sql
-*.sqlite
-
-# 환경 설정 파일
-.bash_history
-.env
-.config/
 
 # 기타
 .DS_Store
-Thumbs.db
+*.log
