@@ -38,6 +38,8 @@ private:
     bool has_published_;
     uint8_t is_stopped_;
     uint16_t is_arrived_;
+
+    int auto_mode_attempts_;
 };
 
 #endif
