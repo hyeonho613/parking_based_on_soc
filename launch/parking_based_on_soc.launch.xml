@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <!-- Launch the parking_based_on_soc node -->
+  <node
+    pkg="parking_based_on_soc"
+    exec="parking_based_on_soc"
+    name="parking_based_on_soc"
+    output="screen"
+  />
+</launch>

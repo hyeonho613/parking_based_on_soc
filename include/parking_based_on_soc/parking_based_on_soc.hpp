@@ -7,6 +7,7 @@
 #include "autoware_adapi_v1_msgs/msg/operation_mode_state.hpp"
 #include "autoware_adapi_v1_msgs/msg/route_state.hpp"
 #include "autoware_adapi_v1_msgs/srv/change_operation_mode.hpp"
+#include "nav_msgs/msg/odometry.hpp"
 
 class ParkingBasedOnSoc : public rclcpp::Node
 {
@@ -17,6 +18,7 @@ private:
     void SocStatusCallback(const std_msgs::msg::Float32 msg);
     void OperationModeCallback(const autoware_adapi_v1_msgs::msg::OperationModeState msg);
     void RoutingStateCallback(const autoware_adapi_v1_msgs::msg::RouteState msg);
+    void PositionCallback(const nav_msgs::msg::Odometry msg);
 
     void ChangeOperationMode();
 
@@ -28,6 +30,7 @@ private:
     rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr soc_status_sub_;
     rclcpp::Subscription<autoware_adapi_v1_msgs::msg::OperationModeState>::SharedPtr operation_mode_sub_;
     rclcpp::Subscription<autoware_adapi_v1_msgs::msg::RouteState>::SharedPtr routing_state_sub_;
+    rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr position_sub_;
 
     rclcpp::Client<autoware_adapi_v1_msgs::srv::ChangeOperationMode>::SharedPtr auto_mode_client_;
 
@@ -38,6 +41,7 @@ private:
     bool has_published_;
     uint8_t is_stopped_;
     uint16_t is_arrived_;
+    geometry_msgs::msg::Point position_;
 
     int auto_mode_attempts_;
 };

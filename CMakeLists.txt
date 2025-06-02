@@ -11,6 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(autoware_adapi_v1_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 
 include_directories(include)
 
@@ -23,10 +24,15 @@ ament_target_dependencies(parking_based_on_soc
   std_msgs
   geometry_msgs
   autoware_adapi_v1_msgs
+  nav_msgs
 )
 
 install(TARGETS parking_based_on_soc
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}/
 )
 
 ament_package()
