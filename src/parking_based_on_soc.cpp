@@ -52,6 +52,13 @@ void ParkingBasedOnSoc::ChangeOperationMode()
 
 void ParkingBasedOnSoc::TimerCallback()
 {
+    if (soc_status_ > 0.2 && has_published_)
+    {
+        has_published_ = false;
+        auto_mode_attempts_ = 0; // 선택적으로 시도 횟수도 리셋하여 새 모드 변경 허용
+        RCLCPP_INFO(this->get_logger(), "soc < 0.2, reset");
+    }
+
     if(soc_status_ < 0.2 && is_stopped_ == 1 && is_arrived_ == 3) // SOC가 20% 아래로 내려가고, 차량이 멈춰있다면 
     {
         if(!has_published_) // 주차장 목표가 아직 설정되지 않았다면
@@ -89,8 +96,3 @@ int main(int argc, char * argv[])
     rclcpp::shutdown();
     return 0; 
 }
-
-// 문제점 1: auto가 안눌림 - 해결
-// 문제점 2: goal 위치까지 가는데 주차를 안함. lanelet에서 parking_space까지 거리가 멀어서? 아니면 렉걸려서?
-// auto 눌리는거 해결, but "stop" 해야할때 auto가 계속 눌림
-// 
