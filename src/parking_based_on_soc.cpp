@@ -8,9 +8,9 @@ ParkingBasedOnSoc::ParkingBasedOnSoc() : Node("parking_based_on_soc")
     soc_status_sub_ = this->create_subscription<std_msgs::msg::Float32>(
         "/soc_can", 10, std::bind(&ParkingBasedOnSoc::SocStatusCallback, this, std::placeholders::_1));
     operation_mode_sub_ = this->create_subscription<autoware_adapi_v1_msgs::msg::OperationModeState>(
-        "/system/operation_mode/state", 10, std::bind(&ParkingBasedOnSoc::OperationModeCallback, this, std::placeholders::_1));
+        "/system/operation_mode/state", rclcpp::QoS{1}.transient_local(), std::bind(&ParkingBasedOnSoc::OperationModeCallback, this, std::placeholders::_1));
     routing_state_sub_ = this->create_subscription<autoware_adapi_v1_msgs::msg::RouteState>(
-        "/api/routing/state", 10, std::bind(&ParkingBasedOnSoc::RoutingStateCallback, this, std::placeholders::_1));
+        "/api/routing/state", rclcpp::QoS{1}.transient_local(), std::bind(&ParkingBasedOnSoc::RoutingStateCallback, this, std::placeholders::_1));
     position_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
         "/localization/kinematic_state", 10, std::bind(&ParkingBasedOnSoc::PositionCallback, this, std::placeholders::_1));
 
@@ -60,28 +60,27 @@ void ParkingBasedOnSoc::ChangeOperationMode()
 
 void ParkingBasedOnSoc::TimerCallback()
 {
-    if (soc_status_ > 0.2 && has_published_)
+    if (soc_status_ > 15.0 && has_published_)
     {
         has_published_ = false;
-        auto_mode_attempts_ = 0; // 선택적으로 시도 횟수도 리셋하여 새 모드 변경 허용
-        RCLCPP_INFO(this->get_logger(), "SOC > 0.2, reset");
+        auto_mode_attempts_ = 0;
+        RCLCPP_INFO(this->get_logger(), "SOC > 15%, reset");
     }
 
-    if(soc_status_ < 0.2 && is_stopped_ == 1 && is_arrived_ == 3 && std::abs(11354.0-position_.x)<10.0 && std::abs(90650.0-position_.y)<10.0)
+    if(soc_status_ < 15.0 && is_stopped_ == 1 && std::abs(11328.0-position_.x)<10.0 && std::abs(90853.0-position_.y)<10.0) // is_arrived_ == 3 && // G0
     {
-        if(!has_published_) // 주차장 목표가 아직 설정되지 않았다면
+        RCLCPP_INFO(this->get_logger(), "Ready to set Parking_Goal");
+        if(!has_published_)
         {
-            goal_msg_.header.stamp = this->now(); // 주차장을 목적지로 설정
+            goal_msg_.header.stamp = this->now();
             goal_msg_.header.frame_id = "map";
-
-            goal_msg_.pose.position.x = 11310.415702509279;
-            goal_msg_.pose.position.y = 90811.31663179968;
-            goal_msg_.pose.position.z = 80.73453034766041;
-
-            goal_msg_.pose.orientation.x = 0.011767542269303335;
-            goal_msg_.pose.orientation.y = -0.01644872365889284;
-            goal_msg_.pose.orientation.z = 0.5817232134648086;
-            goal_msg_.pose.orientation.w = 0.8131353315132175;
+            goal_msg_.pose.position.x = 11336.59765625;
+            goal_msg_.pose.position.y = 90871.5234375;
+            goal_msg_.pose.position.z = 0.0;
+            goal_msg_.pose.orientation.x = 0.0;
+            goal_msg_.pose.orientation.y = 0.0;
+            goal_msg_.pose.orientation.z = 0.48153720206986755;
+            goal_msg_.pose.orientation.w = 0.8764256517370561;
             
             parking_goal_pub_->publish(goal_msg_);
             RCLCPP_INFO(this->get_logger(), "Goal_Pose is Parking_space");
@@ -89,7 +88,7 @@ void ParkingBasedOnSoc::TimerCallback()
         }
     }
 
-    if(has_published_ && (is_arrived_ == 3 || is_arrived_ == 2) && auto_mode_attempts_ < 5) 
+    if(has_published_ && (is_arrived_ == 3 || is_arrived_ == 2) && auto_mode_attempts_ < 5) // 문 닫으면 오토
     {
         ChangeOperationMode();
         RCLCPP_INFO(this->get_logger(), "Change Operation Mode : Auto");
